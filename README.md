@@ -1,5 +1,8 @@
 # Bank Deposit Prediction ML Model Service
-ML Model Deployment with FastAPI, Docker and additional Streamlit Demo Frontend
+ML Model Deployment with FastAPI, Docker and additional Streamlit Demo Frontend.
+
+The full training code is available in Google Colab Notebook [here](https://colab.research.google.com/drive/1NXmAicQQx88PZmK4BBmq1l6sqNFkoOHW?usp=sharing).
+Check it out if you are interested.
 
 ## Setup 
 
