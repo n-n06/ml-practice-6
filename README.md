@@ -24,6 +24,8 @@ Builds and starts both the FastAPI prediction service and the Streamlit demo app
 docker compose up --build
 ```
 
+This might take couple of minutes to install all dependencies using `uv`!
+
 | Service   | URL                        |
 |-----------|----------------------------|
 | API       | http://localhost:8000      |
