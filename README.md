@@ -204,4 +204,5 @@ To simplify the API service testing, I created a simple frontend using Streamlit
 To test it, go to `localhost:8501`. Make sure to follow the setup instructions for **API with Frontend** from the Setup section of this document/
 Simply input all required fields and press predict to get the prediction from the ML API Service.
 
+<img width="1091" height="859" alt="image" src="https://github.com/user-attachments/assets/b05d3805-034e-4732-8157-4dd0827b1a7d" />
 
