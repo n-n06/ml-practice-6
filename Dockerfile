@@ -13,7 +13,8 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 COPY README.md /app/
 
-RUN uv sync --no-dev --frozen
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
 
 COPY . .
 
