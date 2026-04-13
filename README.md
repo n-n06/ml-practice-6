@@ -9,6 +9,13 @@ ML Model Deployment with FastAPI, Docker and additional Streamlit Demo Frontend
 
 ### Running with Docker
 
+First of all, clone the repo.
+
+```bash
+git clone https://github.com/n-n06/ml-practice-6
+cd ml-practice-6
+```
+
 #### API with Frontend 😎 
 
 Builds and starts both the FastAPI prediction service and the Streamlit demo app.
