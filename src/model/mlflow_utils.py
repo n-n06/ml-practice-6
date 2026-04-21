@@ -1,8 +1,8 @@
 import os
 
 import mlflow
+import mlflow.xgboost as xgb
 from mlflow.tracking import MlflowClient
-
 
 def setup_mlflow():
     uri = os.environ.get("MLFLOW_TRACKING_URI")
@@ -24,7 +24,7 @@ def mlflow_run(train_func):
             mlflow.log_params(params)
             mlflow.log_metrics(metrics)
 
-            mlflow.xgboost.log_model(
+            xgb.log_model(
                 best_model,
                 artifact_path="model",
                 registered_model_name="bank-deposit-model"
