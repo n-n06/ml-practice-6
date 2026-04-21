@@ -7,17 +7,17 @@ sys.path.insert(
 )
 
 import pandas as pd
-import joblib
 import kagglehub
 from kagglehub import KaggleDatasetAdapter
 from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, f1_score, precision_score, recall_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBClassifier
  
 from src.model.preprocess import build_preprocessing_pipeline
 from src.model.config import RANDOM_STATE, MODEL_PATH 
+from src.model.mlflow_utils import mlflow_run, setup_mlflow
  
  
 def load_data() -> pd.DataFrame:
@@ -49,7 +49,7 @@ def build_full_pipeline() -> Pipeline:
     ])
  
  
-def tune(pipeline: Pipeline, X_train: pd.DataFrame, y_train: pd.Series) -> Pipeline:
+def tune(pipeline: Pipeline, X_train, y_train) -> Pipeline:
     param_grid = {
         "classifier__n_estimators": [180, 200, 220],
         "classifier__max_depth": [6, 7],
@@ -69,16 +69,12 @@ def tune(pipeline: Pipeline, X_train: pd.DataFrame, y_train: pd.Series) -> Pipel
     print("Best parameters:", grid_search.best_params_)
     return grid_search.best_estimator_
  
- 
-def evaluate(pipeline: Pipeline, X_train, y_train, X_test, y_test) -> None:
-    y_pred = pipeline.predict(X_test)
-    print(f"Test Accuracy: {accuracy_score(y_test, y_pred):.4f}")
-    print(classification_report(y_test, y_pred))
- 
 
-def main():
+@mlflow_run
+def train_model():
+
     df = load_data()
- 
+
     X = df.drop(columns=["deposit"])
     y = df["deposit"]
  
@@ -89,11 +85,36 @@ def main():
     pipeline = build_full_pipeline()
     best_pipeline = tune(pipeline, X_train, y_train)
 
-    evaluate(best_pipeline, X_train, y_train, X_test, y_test)
+    y_pred = best_pipeline.predict(X_test)
 
-    joblib.dump(best_pipeline, MODEL_PATH)
-    print(f"Model saved to {MODEL_PATH}")
- 
+    params = {
+        "model": "xgboost",
+        "n_estimators": best_pipeline.named_steps["classifier"].n_estimators,
+        "max_depth": best_pipeline.named_steps["classifier"].max_depth,
+        "learning_rate": best_pipeline.named_steps["classifier"].learning_rate,
+    }
+
+    metrics = {
+        "accuracy" : accuracy_score(y_test, y_pred),
+        "precision" : precision_score(y_test, y_pred),
+        "recall" : recall_score(y_test, y_pred),
+        "f1_score" : f1_score(y_test, y_pred)
+    }
+
+    return {
+        "params" : params,
+        "metrics" : metrics,
+        "model" : best_pipeline
+    }
+
+
+
+def main():
+    # ml flow setup - obviously)
+    setup_mlflow()
+    train_model()
+    
+    
  
 if __name__ == "__main__":
     main()

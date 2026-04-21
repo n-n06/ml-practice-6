@@ -1,16 +1,64 @@
 services:
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: mlflow
+    ports:
+      - "${MLFLOW_PORT}:5000"
+    depends_on:
+      - minio
+    environment:
+      - MLFLOW_S3_ENDPOINT_URL=${MLFLOW_S3_ENDPOINT_URL}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri ${MLFLOW_BACKEND_URI}
+      --default-artifact-root ${MLFLOW_ARTIFACT_ROOT}
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "${MINIO_API_PORT}:9000"
+      - "${MINIO_CONSOLE_PORT}:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+
+  minio-init:
+    image: minio/mc
+    depends_on:
+      - minio
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set local ${MLFLOW_S3_ENDPOINT_URL} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY};
+      mc mb local/mlflow;
+      mc anonymous set public local/mlflow;
+      exit 0;
+      "
+
   api:
     build: .
     ports:
-      - "8000:8000"
-    volumes:
-      - ./src/model/model.joblib:/app/src/model/model.joblib
- 
+      - "${API_PORT}:8000"
+    depends_on:
+      - mlflow
+    environment:
+      - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}
+
   frontend:
     build:
       context: .
       dockerfile: Dockerfile.frontend
     ports:
-      - "8501:8501"
+      - "${FRONTEND_PORT}:8501"
     depends_on:
       - api
