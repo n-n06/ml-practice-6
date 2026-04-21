@@ -1,5 +1,8 @@
 # Bank Deposit Prediction ML Model Service
-ML Model Deployment with FastAPI, Docker and additional Streamlit Demo Frontend
+ML Model Deployment with FastAPI, Docker and additional Streamlit Demo Frontend.
+
+The full training code is available in Google Colab Notebook [here](https://colab.research.google.com/drive/1NXmAicQQx88PZmK4BBmq1l6sqNFkoOHW?usp=sharing).
+Check it out if you are interested.
 
 ## Setup 
 
@@ -23,6 +26,8 @@ Builds and starts both the FastAPI prediction service and the Streamlit demo app
 ```bash
 docker compose up --build
 ```
+
+This might take couple of minutes to install all dependencies using `uv`!
 
 | Service   | URL                        |
 |-----------|----------------------------|
@@ -199,4 +204,5 @@ To simplify the API service testing, I created a simple frontend using Streamlit
 To test it, go to `localhost:8501`. Make sure to follow the setup instructions for **API with Frontend** from the Setup section of this document/
 Simply input all required fields and press predict to get the prediction from the ML API Service.
 
+<img width="1091" height="859" alt="image" src="https://github.com/user-attachments/assets/b05d3805-034e-4732-8157-4dd0827b1a7d" />
 
