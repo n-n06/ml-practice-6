@@ -7,6 +7,11 @@ Check it out if you are interested.
 ## Setup 
 TL;DR Version (Linux / MacOS):
 ```bash
+# 0. Dir setup (so that Docker does not break)
+mkdir -p mlruns
+touch mlflow.db
+chmod -R u+rwX mlruns mlflow.db
+
 # 1. Clone the repo
 git clone https://github.com/n-n06/ml-practice-6
 cd ml-practice-6
