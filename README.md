@@ -7,16 +7,16 @@ Check it out if you are interested.
 ## Setup 
 TL;DR Version (Linux / MacOS):
 ```bash
-# 0. Dir setup (so that Docker does not break)
-mkdir -p mlruns
-touch mlflow.db
-chmod -R u+rwX mlruns mlflow.db
-
 # 1. Clone the repo
 git clone https://github.com/n-n06/ml-practice-6
 cd ml-practice-6
 
-# 2. Create the .env file
+# 2. Dir setup (so that Docker does not break)
+mkdir -p mlruns
+touch mlflow.db
+chmod -R u+rwX mlruns mlflow.db
+
+# 3. Create the .env file
 cat > .env << 'EOF'
 MLFLOW_TRACKING_URI=http://mlflow:5000
 MLFLOW_PORT=5000
@@ -24,7 +24,7 @@ API_PORT=8000
 FRONTEND_PORT=8501
 EOF
 
-# 3. Build and start all services
+# 4. Build and start all services
 docker compose up --build
 ```
 
