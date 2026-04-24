@@ -104,7 +104,9 @@ def train_model():
     return {
         "params" : params,
         "metrics" : metrics,
-        "model" : best_pipeline
+        "model" : best_pipeline,
+        "X_train" : X_train,
+        "y_train" : y_train
     }
 
 
