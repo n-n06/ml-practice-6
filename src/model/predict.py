@@ -19,31 +19,29 @@ import mlflow
 
 class Predictor:
     def __init__(self):
-        mlflow.set_tracking_uri(os.environ.get("MLFLOW_TRACKING_URI"))
+        mlflow.set_tracking_uri(os.environ["MLFLOW_TRACKING_URI"])
+        
+        # Switched from releases to aliases - more future proof
+        self.model_uri = "models:/bank-deposit-model@production"
 
-        self.model_uri = "models:/bank-deposit-model/Production"
+        self.pipeline = self._load_model()
 
-        self.pipeline = self._load_or_train()
-
-    def _load_or_train(self):
+    def _load_model(self):
         try:
-            return mlflow.xgboost.load_model(self.model_uri)
-
+            return mlflow.sklearn.load_model(self.model_uri)
         except Exception as e:
-            subprocess.run(
-                ["uv", "run", "src/model/train.py"],
-                check=True
-            )
-
-            return mlflow.xgboost.load_model(self.model_uri)
+            raise RuntimeError(
+                f"Failed to load model from {self.model_uri}. "
+                f"Ensure training has completed. Original error: {e}"
+            ) from e
 
     def _to_frame(self, record) -> pd.DataFrame:
         if hasattr(record, "model_dump"):
             data = record.model_dump()
         else:
             data = dict(record)
-
-        data = {k: (v.value if hasattr(v, "value") else v) for k, v in data.items()}
+        
+        data = record.model_dump(mode="python")
         return pd.DataFrame([data])
 
     def predict(self, record) -> int:
@@ -53,11 +51,3 @@ class Predictor:
         return float(self.pipeline.predict_proba(self._to_frame(record))[0][1])
 
 
-if __name__ == "__main__":
-    raw = sys.stdin.read().strip()
-    record = json.loads(raw)
-    predictor = Predictor()
-    print(json.dumps({
-        "prediction": predictor.predict(record),
-        "probability": predictor.predict_proba(record),
-    }))

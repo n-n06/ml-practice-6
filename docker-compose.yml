@@ -1,5 +1,4 @@
 services:
-
   mlflow:
     image: ghcr.io/mlflow/mlflow:latest
     container_name: mlflow
@@ -21,11 +20,20 @@ services:
       - MLFLOW_ALLOW_HOST=all
       - MLFLOW_HOST_WHITELIST=*
 
+  trainer:
+    build: .
+    command: uv run src/model/train.py
+    depends_on:
+      mlflow:
+        condition: service_healthy
+
   api:
     build: .
     ports:
       - "${API_PORT}:8000"
     depends_on:
+      trainer:
+        condition: service_completed_successfully
       - mlflow
     environment:
       - MLFLOW_TRACKING_URI=${MLFLOW_TRACKING_URI}

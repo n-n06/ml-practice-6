@@ -1,11 +1,17 @@
-from fastapi import FastAPI
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from src.api.models import ClientData
+from src.api.schemas import ClientData
 from src.model.predict import Predictor
 
-predictor = Predictor()
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.predictor = Predictor()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/", tags=["Health"])
 async def check_health():
@@ -21,7 +27,9 @@ async def check_health():
     description="Return prediction about term deposit subscription given client data", 
     tags=["ML"]
 )
-async def predict_deposit(record: ClientData):
+async def predict_deposit(record: ClientData, request: Request):
+    predictor = request.app.state.predictor
+
     result = predictor.predict(record)          # single dict => 0 or 1
     proba  = predictor.predict_proba(record)    # single dict => float (P(deposit=1))
 
